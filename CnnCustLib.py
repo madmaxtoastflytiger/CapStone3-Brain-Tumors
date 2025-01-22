@@ -9,6 +9,8 @@ from statistics import mode, StatisticsError
 import numpy as np
 from collections import Counter
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 ## Data Wrangling ## 
 
@@ -52,16 +54,6 @@ def check_for_corrupt_images(folder_path, remove_corrupted=True):
 
 
 
-
-# Scale thresholding function
-def scale_thresholding(img_tensor, lower=0.0, upper=1.0):
-    print(f"Before Thresholding: Min={img_tensor.min().item()}, Max={img_tensor.max().item()}")
-    img_tensor = torch.clamp(img_tensor, min=lower, max=upper)
-    print(f"After Thresholding: Min={img_tensor.min().item()}, Max={img_tensor.max().item()}")
-    return img_tensor
-
-
-
 def scale_thresholding_main(folder_path, output_path, batch_size=16, lower=0.0, upper=1.0, resize=False, new_size=(256, 256)):
     # saves all image type as what they were originally, so a png will still be a png and not converted into a jpg
 
@@ -101,6 +93,38 @@ def scale_thresholding_main(folder_path, output_path, batch_size=16, lower=0.0, 
             save_path = os.path.join(output_path, class_name, new_file_name)
             save_image(scaled_image, save_path)
             print(f"Saved: {save_path}")
+
+
+def quick_plot_bar_graph(categories, values, figsize = (10, 6), title='Image Counts with Percentages', xlabel='Brain Tumor Types', ylabel='Count'):
+    """
+    Plots a bar graph with counts and percentages displayed on top of the bars.
+
+    Parameters:
+    - categories: List of category names (x-axis).
+    - values: List of corresponding values (heights of the bars).
+    """
+    # Calculate total for percentage calculation
+    total = sum(values)
+    
+    # Plot the bar graph
+    plt.figure(figsize=figsize)
+    bars = plt.bar(categories, values, color='skyblue')
+
+    # Add count and percentage on top of each bar
+    for bar, value in zip(bars, values):
+        height = bar.get_height()
+        percentage = (value / total) * 100
+        plt.text(bar.get_x() + bar.get_width() / 2, height, 
+                 f'{value}\n({percentage:.1f}%)', 
+                 ha='center', va='bottom', fontsize=10)
+
+    # Add titles and labels
+    plt.title(title, fontsize=16)
+    plt.xlabel(xlabel, fontsize=12)
+    plt.ylabel(ylabel, fontsize=12)
+
+    # Show the plot
+    plt.show()
 
 
 
@@ -185,7 +209,6 @@ def analyze_file_size(folder_path, unit="KB"):
         return {'total_files_scanned': total_files}
 
     
-
 
 def analyze_file_dimensions(folder_path):
     """
